@@ -17,15 +17,28 @@ const LINE =
 
 const MAX_CHARS = 200;
 
-if (LINE.length < 1 || LINE.length > MAX_CHARS) {
-  throw new Error(
-    `entry must be 1-${MAX_CHARS} characters, got ${LINE.length}`,
-  );
-}
-if (LINE.trim().length === 0) {
-  throw new Error("entry must not be only white space");
+// The competition requires a non-empty, non-whitespace entry within the
+// character limit. Centralising the checks here keeps the top-level flow
+// to a single validate-then-write sequence.
+function validateEntry(line: string): void {
+  if (line.length < 1 || line.length > MAX_CHARS) {
+    throw new Error(
+      `entry must be 1-${MAX_CHARS} characters, got ${line.length}`,
+    );
+  }
+  if (line.trim().length === 0) {
+    throw new Error("entry must not be only white space");
+  }
+  // The brief asks for one line: a status update, not a paragraph.
+  if (line.includes("\n") || line.includes("\r")) {
+    throw new Error("entry must be a single line");
+  }
 }
 
+validateEntry(LINE);
+
+const OUTPUT_PATH = "/output/entry.txt";
+
 mkdirSync("/output", { recursive: true });
-writeFileSync("/output/entry.txt", LINE, "utf8");
-console.log(`wrote ${LINE.length} characters to /output/entry.txt`);
+writeFileSync(OUTPUT_PATH, LINE, "utf8");
+console.log(`wrote ${LINE.length} characters to ${OUTPUT_PATH}`);
